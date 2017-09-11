@@ -16,38 +16,7 @@ const db = require('../db');
  * }
  */
 router.get('/all', function(req, res, next) {
-  db.many('select * from orders')
-    .then(function (data) {
-      if (!data) {
-        res.sendStatus(404);
-        return;
-      }
-      res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Get information of all orders successfully.'
-        });
-    })
-    .catch(function (err) {
-      return next(err);
-    });
-});
-
-/**
- * List all orders of a customer
- * @returns {
- *  status: HttpResponseStatus,
- *  data: [{
- *    ID: number,
- *    status: string,
- *    placeDate: Date | null
- *  }]
- *  message: string
- * }
- */
-router.get('/:customerID/all', function(req, res, next) {
-  db.one('select ID, status, placeDate from orders where cID = $1', req.params.customerID)
+  db.many('SELECT * from orders')
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -74,13 +43,13 @@ router.get('/:customerID/all', function(req, res, next) {
  *  status: HttpResponseStatus,
  *  data: [{
  *    pID: number,
- *    quatity: number
+ *    quantity: number
  *  }]
  *  message: string
  * }
  */
 router.get('/:orderId', function(req, res, next) {
-  db.many('select pID, quatity from orderDetails where ID = $1', req.params.orderId)
+  db.many('SELECT pID, quantity from orderDetails where ID = $1', req.params.orderId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -106,7 +75,7 @@ router.get('/:orderId', function(req, res, next) {
  *  placeDate: Date | null,
  *  products:[{
  *   pID: number,
- *   quatity: number
+ *   quantity: number
  *  }]
  * } req.body
  * @returns {
@@ -122,7 +91,7 @@ router.post('/insert', function(req, res, next) {
       oID = data.rows[0].ID;
       for (const element of req.body.products) {
         element.oID = oID;
-        db.none('insert into orderDetails(oID, cID, pID, quatity) values( ${oID}, ${cID}, ${status},' +
+        db.none('insert into orderDetails(oID, cID, pID, quantity) values( ${oID}, ${cID}, ${status},' +
           ' ${placeDate})', element)
           .then(function () {
             res.status(200)
@@ -160,7 +129,7 @@ router.post('/:orderId/update', function(req, res, next) {
       res.status(200)
         .json({
           status: 'success',
-          message: 'Updated name and quatity of order' + req.params.orderId + ' successfully.'
+          message: 'Updated name and quantity of order' + req.params.orderId + ' successfully.'
         });
     })
     .catch(function (err) {
@@ -200,11 +169,11 @@ router.post('/:orderId/delete', function(req, res, next) {
 });
 
 /**
- * Add a new product of an existing order, or add certain value to the quatity of a existing
+ * Add a new product of an existing order, or add certain value to the quantity of a existing
  * product of an order
  * @param {
  *  product: number,
- *  quatity: number
+ *  quantity: number
  * } req.body
  * @returns {
  *  status: HttpResponseStatus,
@@ -212,20 +181,20 @@ router.post('/:orderId/delete', function(req, res, next) {
  * }
  */
 router.post('/:orderId/product/insert', function(req, res, next) {
-  db.manyOrNone('select pID, quatity from orderDetails where oID = $1', req.params.orderId)
+  db.manyOrNone('SELECT pID, quantity from orderDetails where oID = $1', req.params.orderId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
         return;
       }
-      let newQuatity = req.body.quatity;
+      let newQuatity = req.body.quantity;
       for (const row of data.rows) {
         if (row.pID === req.body.product) {
-          newQuatity += row.quatity;
+          newQuatity += row.quantity;
           break;
         }
       }
-      db.none('insert into orderDetails(oID, pID, quatity) values($1, $2, $3)'
+      db.none('insert into orderDetails(oID, pID, quantity) values($1, $2, $3)'
         , [req.params.orderId, req.body.product, newQuatity])
         .then(function () {
           res.status(200)
@@ -244,7 +213,7 @@ router.post('/:orderId/product/insert', function(req, res, next) {
 });
 
 /**
- * Update a product's quatity of an existing order
+ * Update a product's quantity of an existing order
  * @param {
  *  orderId: number,
  *  productId: number
@@ -255,19 +224,19 @@ router.post('/:orderId/product/insert', function(req, res, next) {
  * }
  */
 router.post('/:orderId/product/:productId/update', function(req, res, next) {
-  db.one('select * from orderDetails where oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
+  db.one('SELECT * from orderDetails where oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
         return;
       }
-      db.none('update orderDetails set quatity = $1 where oID=$2 AND pID = $3',
-        [req.body.quatity, req.params.orderId, req.params.productId])
+      db.none('update orderDetails set quantity = $1 where oID=$2 AND pID = $3',
+        [req.body.quantity, req.params.orderId, req.params.productId])
         .then(function () {
           res.status(200)
             .json({
               status: 'success',
-              message: 'Update quatity of product ' + req.body.product + ' in order ' + req.params.orderId + ' successfully.'
+              message: 'Update quantity of product ' + req.body.product + ' in order ' + req.params.orderId + ' successfully.'
             });
         })
         .catch(function (err) {
@@ -293,6 +262,52 @@ router.post('/:orderId/product/:productId/delete', function(req, res, next) {
         .json({
           status: 'success',
           message: 'Delete product ' + req.body.product + ' in order ' + req.params.orderId + ' successfully.'
+        });
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+});
+
+/**
+ * Get average number of products sold in a period
+ * @param {
+ *  start: Date,
+ *  end: Date,
+ *  unit: string
+ * } req.body
+ * @returns {
+ *  status: HttpResponseStatus,
+ *  data: {
+ *    average: number,
+ *  }
+ *  message: string
+ * }
+ */
+router.get('/average', function(req, res, next) {
+  db.one('SELECT sum(quantity) as sum from orders JOIN orderDetails ON orders.ID =' +
+    ' orderDetails.oID where placeDate >= $1 AND placeDate <= $2'
+    , req.body.start, req.body.end)
+    .then(function (data) {
+      if (!data) {
+        res.sendStatus(404);
+        return;
+      }
+      const timeDiff = Math.abs(req.body.end.getTime() - req.body.start.getTime());
+      const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      let average = data.sum / diffDays;;
+      if (req.body.unit === 'week') {
+        average *= 7;
+      } else if (req.body.unit === 'month') {
+        average *= 30;
+      }
+      res.status(200)
+        .json({
+          status: 'success',
+          data: {
+            average
+          },
+          message: 'Get information of all orders successfully.'
         });
     })
     .catch(function (err) {

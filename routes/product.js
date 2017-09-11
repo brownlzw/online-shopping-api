@@ -9,13 +9,13 @@ const db = require('../db');
  *  data: [{
  *    ID: number,
  *    name: string,
- *    quatity: number
+ *    quantity: number
  *  }]
  *  message: string
  * }
  */
 router.get('/all', function(req, res, next) {
-  db.many('select * from products')
+  db.many('SELECT * from products')
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -43,13 +43,13 @@ router.get('/all', function(req, res, next) {
  *  data: {
  *    ID: number,
  *    name: string,
- *    quatity: number
+ *    quantity: number
  *  }
  *  message: string
  * }
  */
 router.get('/:productId', function(req, res, next) {
-  db.one('select * from products where ID = $1', req.params.productId)
+  db.one('SELECT * from products where ID = $1', req.params.productId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -71,7 +71,7 @@ router.get('/:productId', function(req, res, next) {
  * Insert a new product into DB
  * @param {
  *  name: string,
- *  quatity: number
+ *  quantity: number
  * } req.body
  * @returns {
  *  status: HttpResponseStatus,
@@ -79,7 +79,7 @@ router.get('/:productId', function(req, res, next) {
  * }
  */
 router.post('/insert', function(req, res, next) {
-  db.none('insert into products(name, quatity) values(${name}, ${quatity})', req.body)
+  db.none('insert into products(name, quantity) values(${name}, ${quantity})', req.body)
     .then(function () {
       res.status(200)
         .json({
@@ -96,7 +96,7 @@ router.post('/insert', function(req, res, next) {
  * Update an existing product
  * @param {
  *  name: stirng,
- *  quatity: number
+ *  quantity: number
  * } req.body
  * @returns {
  *  status: HttpResponseStatus,
@@ -104,13 +104,13 @@ router.post('/insert', function(req, res, next) {
  * }
  */
 router.post('/:productId/update', function(req, res, next) {
-  db.none('update products set name=$1, quatity=$2 where ID=$3',
-    [req.body.name, req.body.quatity, req.params.productId])
+  db.none('update products set name=$1, quantity=$2 where ID=$3',
+    [req.body.name, req.body.quantity, req.params.productId])
     .then(function () {
       res.status(200)
         .json({
           status: 'success',
-          message: 'Updated name and quatity of product' + req.params.productId + ' successfully.'
+          message: 'Updated name and quantity of product' + req.params.productId + ' successfully.'
         });
     })
     .catch(function (err) {
@@ -145,7 +145,7 @@ router.post('/:productId/delete', function(req, res, next) {
 /**
  * Add a new category of an existing product
  * @param {
- *  category: string,
+ *  category: number,
  * } req.body
  * @returns {
  *  status: HttpResponseStatus,
@@ -153,13 +153,13 @@ router.post('/:productId/delete', function(req, res, next) {
  * }
  */
 router.post('/:productId/category/insert', function(req, res, next) {
-  db.oneOrNone('select * from products where name = $1 AND pID = $2', req.body.category, req.params.productId)
+  db.oneOrNone('SELECT * from category-product where cID = $1 AND pID = $2', req.body.category, req.params.productId)
     .then(function (data) {
       if (data) {
         res.sendStatus(404);
         return;
       }
-      db.none('insert into categories(name, pID) values($1, $2)', [req.body.category, req.params.productId])
+      db.none('insert into category-product(cID, pID) values($1, $2)', [req.body.category, req.params.productId])
         .then(function () {
           res.status(200)
             .json({
@@ -178,18 +178,22 @@ router.post('/:productId/category/insert', function(req, res, next) {
 
 /**
  * Delete a category of an existing product
+ * @param {
+ *  productId: number,
+ *  categoryId: number,
+ * }
  * @returns {
  *  status: HttpResponseStatus,
  *  message: string,
  * }
  */
-router.post('/:productId/category/:categoryName/delete', function(req, res, next) {
-  db.one('delete from categories where name = $1 AND pID = $2', req.params.categoryName, req.params.productId)
+router.post('/:productId/category/:categoryId/delete', function(req, res, next) {
+  db.one('delete from categories where cID = $1 AND pID = $2', req.params.categoryId, req.params.productId)
     .then(function (data) {
       res.status(200)
         .json({
           status: 'success',
-          message: 'Delete category of product ' + req.params.productId + ' successfully.'
+          message: 'Delete category ' + req.params.categoryId + ' of product ' + req.params.productId + ' successfully.'
         });
     })
     .catch(function (err) {

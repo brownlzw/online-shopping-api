@@ -4,8 +4,13 @@ CREATE DATABASE shopping;
 \c shopping;
 
 CREATE TABLE categories (
+  ID SERIAL PRIMARY KEY,
   name VARCHAR(30) NOT NULL, -- category's name
-  pID int references(products(ID)) -- ID of product that belong to this category
+);
+
+CREATE TABLE category-product (
+  cID number references(categories(ID)), -- category's ID
+  pID number references(products(ID)), -- product's ID
 );
 
 CREATE TABLE products (
@@ -23,7 +28,7 @@ CREATE TABLE customers (
 CREATE TABLE orders (
   ID SERIAL PRIMARY KEY,
   cID int references(customers(ID)), -- customer of the order
-  status VARCHAR(20) NOT NULL, -- status of the order
+  status VARCHAR(30) NOT NULL, -- status of an order: waiting for delivery, on its way, delivered...
   placeDate DATE -- date of the order placed
 );
 

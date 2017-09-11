@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 
 /**
- * list name for all categories
+ * list all categories
  * @returns {
  *  status: HttpResponseStatus,
  *  data: [{
@@ -13,7 +13,7 @@ const db = require('../db');
  * }
  */
 router.get('/all', function(req, res, next) {
-  db.many('select distinct(name) from categories')
+  db.many('SELECT * from categories')
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -34,7 +34,7 @@ router.get('/all', function(req, res, next) {
 /**
  * Lists all products that belongs to a category
  * @param {
- *  name: string
+ *  categoryId: number
  * }
  * @returns {
  *  status: HttpResponseStatus,
@@ -44,8 +44,8 @@ router.get('/all', function(req, res, next) {
  *  message: string
  * }
  */
-router.get('/:categoryName/products', function(req, res, next) {
-  db.many('select pID from categories where name = $1', req.params.categoryName)
+router.get('/:categoryId/products', function(req, res, next) {
+  db.many('SELECT pID from category-product where cID = $1', req.params.categoryId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -55,7 +55,7 @@ router.get('/:categoryName/products', function(req, res, next) {
         .json({
           status: 'success',
           data: data,
-          message: 'Get all products that belongs to category' + req.params.categoryName + ' successfully.'
+          message: 'Get all products that belongs to category' + req.params.categoryId + ' successfully.'
         });
     })
     .catch(function (err) {
@@ -67,7 +67,6 @@ router.get('/:categoryName/products', function(req, res, next) {
  * Insert a new category into DB
  * @param {
  *  name: string,
- *  pIDs: number[]
  * } req.body
  * @returns {
  *  status: HttpResponseStatus,
@@ -75,25 +74,13 @@ router.get('/:categoryName/products', function(req, res, next) {
  * }
  */
 router.post('/insert', function(req, res, next) {
-  db.manyOrNone('select * from categories where name = $1', req.params.categoryName)
-    .then(function (data) {
-      if (!data) {
-        res.sendStatus(404);
-        return;
-      }
-      for (const pID of req.body.pIDs) {
-        db.none('insert into categories(name, pID) values($1, $2)', req.body.name, pID)
-          .then(function () {
-            res.status(200)
-              .json({
-                status: 'success',
-                message: 'Inserted one category successfully.'
-              });
-          })
-          .catch(function (err) {
-            return next(err);
-          });
-      }
+  db.none('insert into categories(name) values($1)', req.body.name)
+    .then(function () {
+      res.status(200)
+        .json({
+          status: 'success',
+          message: 'Inserted one category successfully.'
+        });
     })
     .catch(function (err) {
       return next(err);
@@ -110,15 +97,14 @@ router.post('/insert', function(req, res, next) {
  *  message: string
  * }
  */
-router.post('/:categoryName/update', function(req, res, next) {
-  db.none('update categories set name=$1 where name=$2',
-    [req.body.name, req.params.categoryName])
+router.post('/:categoryId/update', function(req, res, next) {
+  db.none('update categories set name=$1 where ID=$2',
+    [req.body.name, req.params.categoryId])
     .then(function () {
       res.status(200)
         .json({
           status: 'success',
-          message: 'Change category' + req.params.categoryName + ' into category '
-          + req.body.name +' successfully.'
+          message: 'Update category' + req.params.categoryId + ' successfully.'
         });
     })
     .catch(function (err) {
@@ -136,13 +122,19 @@ router.post('/:categoryName/update', function(req, res, next) {
  *  message: string
  * }
  */
-router.post('/:categoryName/delete', function(req, res, next) {
-  db.none('delete from categories where name = $1', req.params.categoryName)
+router.post('/:categoryId/delete', function(req, res, next) {
+  db.none('delete from category-product where cID = $1', req.params.categoryId)
     .then(function () {
-      res.status(200)
-        .json({
-          status: 'success',
-          message: 'Delete category ' + req.params.categoryName + ' successfully.'
+      db.none('delete from categories where ID = $1', req.params.categoryId)
+        .then(function () {
+          res.status(200)
+            .json({
+              status: 'success',
+              message: 'Delete category ' + req.params.categoryId + ' successfully.'
+            });
+        })
+        .catch(function (err) {
+          return next(err);
         });
     })
     .catch(function (err) {
