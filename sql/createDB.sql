@@ -4,19 +4,20 @@ CREATE DATABASE shopping;
 \c shopping;
 
 CREATE TABLE categories (
-  ID SERIAL PRIMARY KEY,
-  name VARCHAR(80), -- category name
+  name VARCHAR(30) NOT NULL, -- category's name
+  pID int references(products(ID)) -- ID of product that belong to this category
 );
 
 CREATE TABLE products (
   ID SERIAL PRIMARY KEY,
-  name VARCHAR(30), -- product name
-  category int references(categories(ID)), -- category of the product
+  name VARCHAR(80) NOT NULL, -- product's name
+  quantity int NOT NULL -- number of the product stored
 );
 
 CREATE TABLE customers (
   ID SERIAL PRIMARY KEY,
-  name VARCHAR(30), -- customer name
+  firstName VARCHAR(30) NOT NULL, -- customer's first name
+  lastName VARCHAR(30) NOT NULL -- customer's last name
 );
 
 CREATE TABLE orders (
@@ -29,7 +30,7 @@ CREATE TABLE orders (
 CREATE TABLE orderDetails (
   oID int references(orders(ID)), -- order ID
   pID int references(products(ID)), -- product of the order
-  quatity int NOT NULL, -- number of this product in the order
+  quantity int NOT NULL, -- number of this product in the order
 );
 
 
