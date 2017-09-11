@@ -49,7 +49,7 @@ router.get('/all', function(req, res, next) {
  * }
  */
 router.get('/:customerId', function(req, res, next) {
-  db.one('SELECT * from customers where ID = $1', req.params.customerId)
+  db.one('SELECT * from customers WHERE ID = $1', req.params.customerId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -104,7 +104,7 @@ router.post('/insert', function(req, res, next) {
  * }
  */
 router.post('/:customerId/update', function(req, res, next) {
-  db.none('update customers set firstName=$1, lastName=$2 where ID=$3',
+  db.none('update customers set firstName=$1, lastName=$2 WHERE ID=$3',
     [req.body.firstName, req.body.lastName, req.params.customerId])
     .then(function () {
       res.status(200)
@@ -129,7 +129,7 @@ router.post('/:customerId/update', function(req, res, next) {
  * }
  */
 router.post('/:customerId/delete', function(req, res, next) {
-  db.none('delete from customers where ID = $1', req.params.customerId)
+  db.none('delete from customers WHERE ID = $1', req.params.customerId)
     .then(function () {
       res.status(200)
         .json({
@@ -214,7 +214,7 @@ router.get('/categoryCount', function(req, res, next) {
  * }
  */
 router.get('/:customerId/order', function(req, res, next) {
-  db.many('SELECT ID as order_id, status, placeDate from orders where cID = $1', req.params.customerId)
+  db.many('SELECT ID as order_id, status, placeDate from orders WHERE cID = $1', req.params.customerId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);

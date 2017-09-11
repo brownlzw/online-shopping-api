@@ -45,7 +45,7 @@ router.get('/all', function(req, res, next) {
  * }
  */
 router.get('/:categoryId/products', function(req, res, next) {
-  db.many('SELECT pID from category-product where cID = $1', req.params.categoryId)
+  db.many('SELECT pID from category-product WHERE cID = $1', req.params.categoryId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -98,7 +98,7 @@ router.post('/insert', function(req, res, next) {
  * }
  */
 router.post('/:categoryId/update', function(req, res, next) {
-  db.none('update categories set name=$1 where ID=$2',
+  db.none('update categories set name=$1 WHERE ID=$2',
     [req.body.name, req.params.categoryId])
     .then(function () {
       res.status(200)
@@ -123,9 +123,9 @@ router.post('/:categoryId/update', function(req, res, next) {
  * }
  */
 router.post('/:categoryId/delete', function(req, res, next) {
-  db.none('delete from category-product where cID = $1', req.params.categoryId)
+  db.none('delete from category-product WHERE cID = $1', req.params.categoryId)
     .then(function () {
-      db.none('delete from categories where ID = $1', req.params.categoryId)
+      db.none('delete from categories WHERE ID = $1', req.params.categoryId)
         .then(function () {
           res.status(200)
             .json({

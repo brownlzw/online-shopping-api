@@ -49,7 +49,7 @@ router.get('/all', function(req, res, next) {
  * }
  */
 router.get('/:productId', function(req, res, next) {
-  db.one('SELECT * from products where ID = $1', req.params.productId)
+  db.one('SELECT * from products WHERE ID = $1', req.params.productId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -104,7 +104,7 @@ router.post('/insert', function(req, res, next) {
  * }
  */
 router.post('/:productId/update', function(req, res, next) {
-  db.none('update products set name=$1, quantity=$2 where ID=$3',
+  db.none('update products set name=$1, quantity=$2 WHERE ID=$3',
     [req.body.name, req.body.quantity, req.params.productId])
     .then(function () {
       res.status(200)
@@ -129,7 +129,7 @@ router.post('/:productId/update', function(req, res, next) {
  * }
  */
 router.post('/:productId/delete', function(req, res, next) {
-  db.none('delete from products where ID = $1', req.params.productId)
+  db.none('delete from products WHERE ID = $1', req.params.productId)
     .then(function (result) {
       res.status(200)
         .json({
@@ -153,7 +153,7 @@ router.post('/:productId/delete', function(req, res, next) {
  * }
  */
 router.post('/:productId/category/insert', function(req, res, next) {
-  db.oneOrNone('SELECT * from category-product where cID = $1 AND pID = $2', req.body.category, req.params.productId)
+  db.oneOrNone('SELECT * from category-product WHERE cID = $1 AND pID = $2', req.body.category, req.params.productId)
     .then(function (data) {
       if (data) {
         res.sendStatus(404);
@@ -188,7 +188,7 @@ router.post('/:productId/category/insert', function(req, res, next) {
  * }
  */
 router.post('/:productId/category/:categoryId/delete', function(req, res, next) {
-  db.one('delete from categories where cID = $1 AND pID = $2', req.params.categoryId, req.params.productId)
+  db.one('delete from categories WHERE cID = $1 AND pID = $2', req.params.categoryId, req.params.productId)
     .then(function (data) {
       res.status(200)
         .json({

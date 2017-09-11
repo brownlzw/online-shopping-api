@@ -49,7 +49,7 @@ router.get('/all', function(req, res, next) {
  * }
  */
 router.get('/:orderId', function(req, res, next) {
-  db.many('SELECT pID, quantity from orderDetails where ID = $1', req.params.orderId)
+  db.many('SELECT pID, quantity from orderDetails WHERE ID = $1', req.params.orderId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -123,7 +123,7 @@ router.post('/insert', function(req, res, next) {
  * }
  */
 router.post('/:orderId/update', function(req, res, next) {
-  db.none('update orders set status=$1, placeDate=$2 where ID=$3',
+  db.none('update orders set status=$1, placeDate=$2 WHERE ID=$3',
     [req.body.status, req.body.placeDate, req.params.orderId])
     .then(function () {
       res.status(200)
@@ -148,9 +148,9 @@ router.post('/:orderId/update', function(req, res, next) {
  * }
  */
 router.post('/:orderId/delete', function(req, res, next) {
-  db.none('delete from orders where ID = $1', req.params.orderId)
+  db.none('delete from orders WHERE ID = $1', req.params.orderId)
     .then(function () {
-      db.none('delete from orderDetails where oID = $1', req.params.orderId)
+      db.none('delete from orderDetails WHERE oID = $1', req.params.orderId)
         .then(function (result) {
           res.status(200)
             .json({
@@ -181,7 +181,7 @@ router.post('/:orderId/delete', function(req, res, next) {
  * }
  */
 router.post('/:orderId/product/insert', function(req, res, next) {
-  db.manyOrNone('SELECT pID, quantity from orderDetails where oID = $1', req.params.orderId)
+  db.manyOrNone('SELECT pID, quantity from orderDetails WHERE oID = $1', req.params.orderId)
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
@@ -224,13 +224,13 @@ router.post('/:orderId/product/insert', function(req, res, next) {
  * }
  */
 router.post('/:orderId/product/:productId/update', function(req, res, next) {
-  db.one('SELECT * from orderDetails where oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
+  db.one('SELECT * from orderDetails WHERE oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
     .then(function (data) {
       if (!data) {
         res.sendStatus(404);
         return;
       }
-      db.none('update orderDetails set quantity = $1 where oID=$2 AND pID = $3',
+      db.none('update orderDetails set quantity = $1 WHERE oID=$2 AND pID = $3',
         [req.body.quantity, req.params.orderId, req.params.productId])
         .then(function () {
           res.status(200)
@@ -256,7 +256,7 @@ router.post('/:orderId/product/:productId/update', function(req, res, next) {
  * }
  */
 router.post('/:orderId/product/:productId/delete', function(req, res, next) {
-  db.none('delete from orderDetailswhere oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
+  db.none('delete from orderDetailsWHERE oID = $1 AND pID = $2', [req.params.orderId, req.params.productId])
     .then(function () {
       res.status(200)
         .json({
@@ -286,7 +286,7 @@ router.post('/:orderId/product/:productId/delete', function(req, res, next) {
  */
 router.get('/average', function(req, res, next) {
   db.one('SELECT sum(quantity) as sum from orders JOIN orderDetails ON orders.ID =' +
-    ' orderDetails.oID where placeDate >= $1 AND placeDate <= $2'
+    ' orderDetails.oID WHERE placeDate >= $1 AND placeDate <= $2'
     , req.body.start, req.body.end)
     .then(function (data) {
       if (!data) {
